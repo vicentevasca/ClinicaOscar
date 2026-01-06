@@ -60,12 +60,6 @@ import heroBackground from '../assets/img/hero_background.avif';
               <div class="absolute inset-0 bg-white/10 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
             </a>
             
-            <RouterLink 
-              to="/servicios"
-              class="px-10 py-4 border border-clinic-navy/20 text-clinic-navy rounded-full font-bold uppercase tracking-widest text-[11px] bg-white/40 backdrop-blur-md hover:bg-clinic-navy hover:text-white transition-all duration-500 text-center"
-            >
-              Ver Tratamientos
-            </RouterLink>
           </div>
         </div>
       </div>
