@@ -1,0 +1,66 @@
+{
+  "brand": {
+    "name": "Dr. Oscar Arellano",
+    "shortName": "Dr. Arellano",
+    "tagline": "Cirujano Dentista & Armonización Facial",
+    "specialty": "Estética Facial Avanzada"
+  },
+  "contact": {
+    "email": "oscarignacioarellanocerda@gmail.com",
+    "phone": "+56 9 5783 8779",
+    "phone2": "+56 9 9615 8003",
+    "address": "Santiago, Región Metropolitana (Clínicas asociadas)",
+    "instagram": "@Dr.oscarac",
+    "bookingLink": "https://forms.gle/2o1domP8ic9m6bb7A",
+    "schedule": "Sábados y Domingos (Previa reserva)"
+  },
+  "hero": {
+    "title": "Armonización Facial Integral",
+    "subtitle": "Realzamos tu belleza natural manteniendo la armonía y proporción de tu rostro. Tratamientos médicos seguros y personalizados.",
+    "cta": "Reservar Evaluación"
+  },
+  "about": {
+    "title": "Pasión por la Estética y el Bienestar",
+    "bio": "Soy Cirujano Dentista titulado de la Universidad Autónoma de Chile, especializado en estética facial. Mi enfoque no es transformar, sino realzar la belleza propia de cada paciente respetando su anatomía.",
+    "philosophy": "Trabajamos con técnicas seguras y personalizadas para que te sientas mejor contigo mismo/a, siempre priorizando resultados naturales.",
+    "experience": "Certificado en Rejuvenecimiento Facial"
+  },
+  "services": [
+    {
+      "id": 1,
+      "title": "Toxina Botulínica (Bótox)",
+      "shortDesc": "Suaviza líneas de expresión y logra un aspecto fresco y descansado relajando la musculatura facial.",
+      "icon": "FaceSmileIcon"
+    },
+    {
+      "id": 2,
+      "title": "Rinomodelación (AH)",
+      "shortDesc": "Corrige y perfila la nariz sin cirugía en pocos minutos, logrando un perfil armónico y equilibrado.",
+      "icon": "SparklesIcon"
+    },
+    {
+      "id": 3,
+      "title": "Relleno de Labios",
+      "shortDesc": "Ácido Hialurónico para hidratar, perfilar y dar volumen natural a tus labios con total seguridad.",
+      "icon": "HeartIcon"
+    },
+    {
+      "id": 4,
+      "title": "Bioestimulación",
+      "shortDesc": "Activa tu propio colágeno para recuperar firmeza y rejuvenecer la piel de forma progresiva.",
+      "icon": "BoltIcon"
+    },
+    {
+      "id": 5,
+      "title": "Hilos Tensores",
+      "shortDesc": "Efecto lifting inmediato sin cirugía. Reafirman y elevan los tejidos estimulando la regeneración.",
+      "icon": "ArrowUpIcon"
+    },
+    {
+      "id": 6,
+      "title": "Peeling Facial",
+      "shortDesc": "Renovación celular profunda para eliminar impurezas, mejorar textura y devolver la luminosidad.",
+      "icon": "SunIcon"
+    }
+  ]
+}
