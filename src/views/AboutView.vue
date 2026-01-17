@@ -1,118 +1,136 @@
 <script setup>
 import { RouterLink } from 'vue-router';
 import content from '../data/content.json';
-
 import oscarPerfil from '../assets/img/oscar_perfil.png';
 
 const signatureText = "Dr. Oscar Arellano";
 </script>
 
 <template>
-  <div class="pt-28 pb-20 bg-white min-h-screen overflow-hidden">
-    <div class="container mx-auto px-6">
+  <section class="py-24 bg-[#050505] min-h-screen relative overflow-hidden selection:bg-clinic-gold selection:text-black">
+    
+    <div class="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-clinic-gold/5 blur-[120px] rounded-full pointer-events-none"></div>
+
+    <div class="container mx-auto px-6 relative z-10">
       
       <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
         
-        <div class="w-full lg:w-1/2 relative group">
-          <div class="absolute inset-0 bg-clinic-navy transform translate-x-6 translate-y-6 rounded-sm opacity-10 transition-transform duration-500 group-hover:translate-x-4 group-hover:translate-y-4"></div>
-          <div class="absolute inset-0 border-2 border-clinic-gold transform -translate-x-4 -translate-y-4 rounded-sm transition-transform duration-500 group-hover:-translate-x-2 group-hover:-translate-y-2"></div>
+        <div class="w-full lg:w-1/2 relative group perspective-1000">
           
-          <div class="relative overflow-hidden rounded-sm shadow-2xl">
+          <div class="absolute inset-0 bg-white/5 transform translate-x-8 translate-y-8 rounded-sm transition-transform duration-700 group-hover:translate-x-4 group-hover:translate-y-4 border border-white/5"></div>
+          
+          <div class="absolute inset-0 border border-clinic-gold/60 transform -translate-x-4 -translate-y-4 rounded-sm transition-transform duration-700 group-hover:-translate-x-2 group-hover:-translate-y-2 z-20 pointer-events-none"></div>
+          
+          <div class="relative overflow-hidden rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.8)] bg-[#0a0a0a]">
+             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 opacity-60"></div>
+
              <img 
-              :src="oscarPerfil" 
-              alt="Dr. Oscar Arellano - Cirujano Dentista" 
-              class="w-auto h-auto object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-            />
+               :src="oscarPerfil" 
+               alt="Dr. Oscar Arellano - Cirujano Dentista" 
+               class="w-full h-auto object-cover object-center transform transition-transform duration-[1.5s] ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100 grayscale-[20%] group-hover:grayscale-0"
+             />
             
-            <div class="absolute bottom-20 right-2 bg-white/95 backdrop-blur-md p-4 shadow-xl border-l-4 border-clinic-gold max-w-[220px]">
-              <p class="text-xs text-clinic-gold font-bold uppercase tracking-widest mb-1">Registro Salud</p>
-              <p class="text-sm text-clinic-navy font-medium leading-tight">Cirujano Dentista especializado en Estética Facial</p>
+            <div class="absolute bottom-10 right-0 lg:-right-6 z-20 bg-[#111111]/90 backdrop-blur-md p-6 shadow-2xl border-l-2 border-clinic-gold max-w-[260px] transform transition-transform duration-500 hover:-translate-y-2">
+              <p class="text-[10px] text-clinic-gold font-bold uppercase tracking-[0.2em] mb-2">Registro SIS</p>
+              <p class="text-white font-serif text-sm leading-relaxed">
+                Cirujano Dentista especializado en <span class="italic text-gray-400">Estética Facial Avanzada</span>.
+              </p>
             </div>
           </div>
         </div>
 
         <div class="w-full lg:w-1/2">
           
-          <div class="mb-8">
-            <span class="text-clinic-gold font-bold uppercase tracking-[0.2em] text-xs flex items-center gap-2 mb-4">
-              <span class="w-8 h-[1px] bg-clinic-gold"></span>
+          <div class="mb-10 animate-fade-in">
+            <span class="text-clinic-gold font-bold uppercase tracking-[0.3em] text-[10px] flex items-center gap-3 mb-6">
+              <span class="w-12 h-[1px] bg-gradient-to-r from-clinic-gold to-transparent"></span>
               Excelencia Clínica
             </span>
-            <h1 class="text-4xl md:text-5xl font-serif font-bold text-clinic-navy leading-tight">
+            
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1] mb-4">
               {{ content.brand.name }}
             </h1>
-            <p class="text-clinic-gold font-medium mt-2 italic">Cirujano Dentista · Universidad Autónoma de Chile</p>
+            <p class="text-gray-400 text-lg font-light tracking-wide">
+              Cirujano Dentista · <span class="text-clinic-gold italic font-serif">Universidad Autónoma de Chile</span>
+            </p>
           </div>
 
-          <blockquote class="border-l-4 border-clinic-gold pl-6 py-2 my-8 italic text-xl text-gray-700 font-serif">
-            "Mi objetivo no es transformar rostros, sino potenciar la belleza única de cada paciente mediante la armonía y el equilibrio natural."
+          <blockquote class="relative border-l-2 border-clinic-gold/50 pl-8 py-4 my-10 bg-white/5 rounded-r-lg">
+            <p class="italic text-xl md:text-2xl text-white font-serif leading-relaxed">
+              "Mi objetivo no es transformar rostros, sino potenciar la belleza única de cada paciente mediante la armonía."
+            </p>
           </blockquote>
 
-          <div class="space-y-6 text-gray-600 font-sans leading-relaxed text-lg font-light">
+          <div class="space-y-6 text-gray-400 font-sans leading-relaxed text-base md:text-lg font-light">
             <p>
-              Como especialista en Armonización Facial, entiendo que cada rostro cuenta una historia diferente. Mi enfoque combina la precisión técnica de la odontología con una visión artística de la estética facial avanzada.
+              Como especialista en <strong class="text-white font-normal">Armonización Facial</strong>, entiendo que cada rostro cuenta una historia diferente. Mi enfoque combina la precisión clínica con una visión artística.
             </p>
             <p>
-              Utilizo procedimientos mínimamente invasivos y productos de la más alta gama para garantizar resultados seguros, sutiles y, por sobre todo, naturales. Mi compromiso es brindarte un espacio de confianza donde tu bienestar es la prioridad.
+              Utilizo procedimientos mínimamente invasivos y productos de alta gama (Bioestimuladores, Ácido Hialurónico) para garantizar resultados <span class="text-white border-b border-clinic-gold/30 pb-0.5">seguros y naturales</span>.
             </p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 border-t border-gray-100 pt-8">
-            <div class="flex items-start gap-4">
-              <div class="p-3 bg-clinic-bg rounded-full text-clinic-navy">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 border-t border-white/10 pt-10">
+            <div class="flex items-start gap-4 group">
+              <div class="p-3 bg-white/5 rounded-full text-clinic-gold group-hover:bg-clinic-gold group-hover:text-black transition-all duration-500">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div>
-                <h4 class="font-bold text-clinic-navy text-lg font-serif">Cirujano Dentista</h4>
-                <p class="text-sm text-gray-500">U. Autónoma de Chile</p>
+                <h4 class="font-bold text-white text-base uppercase tracking-wider mb-1">Profesionalismo</h4>
+                <p class="text-xs text-gray-500 leading-relaxed">Registro Nacional de Prestadores Individuales de Salud.</p>
               </div>
             </div>
             
-            <div class="flex items-start gap-4">
-              <div class="p-3 bg-clinic-bg rounded-full text-clinic-navy">
+            <div class="flex items-start gap-4 group">
+              <div class="p-3 bg-white/5 rounded-full text-clinic-gold group-hover:bg-clinic-gold group-hover:text-black transition-all duration-500">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <h4 class="font-bold text-clinic-navy text-lg font-serif">Armonización</h4>
-                <p class="text-sm text-gray-500">Estética Facial Integral</p>
+                <h4 class="font-bold text-white text-base uppercase tracking-wider mb-1">Vanguardia</h4>
+                <p class="text-xs text-gray-500 leading-relaxed">Técnicas avanzadas de rejuvenecimiento sin cirugía.</p>
               </div>
             </div>
           </div>
 
-          <div class="mt-12 flex items-center justify-between border-t border-gray-50 pt-8">
-            <div class="text-3xl text-clinic-gold font-serif italic opacity-80 select-none">
+          <div class="mt-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+            <div class="text-2xl md:text-3xl text-clinic-gold font-serif italic select-none opacity-90 font-light signature-font">
               {{ signatureText }}
             </div>
             
             <RouterLink 
               to="/contacto" 
-              class="group inline-flex items-center text-clinic-navy font-bold hover:text-clinic-gold transition-colors"
+              class="group relative px-8 py-3 bg-transparent border border-white/30 text-white text-xs font-bold uppercase tracking-widest rounded-full hover:border-clinic-gold transition-all duration-300 overflow-hidden"
             >
-              Contactar ahora
-              <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <span class="relative z-10 group-hover:text-clinic-gold transition-colors">Agendar Cita</span>
+              <div class="absolute inset-0 bg-white/5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
             </RouterLink>
           </div>
 
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <style scoped>
-/* Transición suave para la carga de la página */
-.container {
-  animation: slideUp 0.8s ease-out forwards;
+.perspective-1000 {
+  perspective: 1000px;
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
+/* Animación sutil de entrada */
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Opcional: Si quieres una fuente de firma específica */
+/* .signature-font { font-family: 'Great Vibes', cursive; } */
 </style>

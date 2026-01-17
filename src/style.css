@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* src/style.css */
+
+/* Forzar fondo negro en la raíz del documento */
+html, body {
+  background-color: #050505; /* El mismo negro de tu LoadingScreen */
+  color: #1a1a1a; /* Color de texto base por seguridad */
+}
+
+/* Opcional: Personalizar la barra de desplazamiento para que no sea gris fea */
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #d4af37; /* Clinic Gold */
+}

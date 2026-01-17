@@ -14,7 +14,7 @@ const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
 };
 
-// Bloquear el scroll del cuerpo cuando el menú móvil está abierto
+// Bloquear scroll body cuando el menú móvil está abierto
 watch(isMobileMenuOpen, (val) => {
   if (val) {
     document.body.style.overflow = 'hidden';
@@ -31,8 +31,8 @@ onUnmounted(() => {
 
 const navLinks = [
   { name: 'Inicio', path: '/' },
-  { name: 'Sobre Mí', path: '/nosotros' },
-  { name: 'Servicios', path: '/servicios' },
+  { name: 'Nosotos', path: '/nosotros' }, // "Sobre mí" suena más común, Filosofía es más premium
+  { name: 'servicios', path: '/servicios' },
   { name: 'Contacto', path: '/contacto' },
 ];
 </script>
@@ -40,87 +40,111 @@ const navLinks = [
 <template>
   <header 
     :class="[
-      'fixed w-full z-[100] transition-all duration-500',
-      isScrolled || isMobileMenuOpen
-        ? 'bg-white shadow-md py-3' 
-        : 'bg-transparent py-6'
+      'fixed w-full z-[100] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+      isScrolled 
+        ? 'bg-[#050505]/80 backdrop-blur-xl py-4 border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
+        : 'bg-transparent py-6 border-b border-transparent'
     ]"
   >
     <nav class="container mx-auto px-6 flex justify-between items-center relative z-[110]">
-      <RouterLink to="/" @click="closeMobileMenu" class="text-2xl font-serif font-bold text-clinic-navy tracking-tight">
-        Dr. <span class="text-clinic-gold">Arellano</span>
+      
+      <RouterLink to="/" @click="closeMobileMenu" class="relative group z-50">
+        <div class="flex flex-col leading-none">
+            <span class="text-[10px] font-bold text-clinic-gold tracking-[0.4em] uppercase mb-1 opacity-80 group-hover:opacity-100 transition-opacity">Clínica Estética</span>
+            <span class="text-2xl font-serif font-bold text-white tracking-tight">
+              Dr. <span class="italic font-light text-clinic-gold group-hover:text-clinic-gold transition-colors duration-500">Arellano</span>
+            </span>
+        </div>
       </RouterLink>
 
-      <div class="hidden md:flex space-x-8 items-center">
-        <RouterLink 
-          v-for="link in navLinks" 
-          :key="link.path" 
-          :to="link.path"
-          class="text-xs font-bold hover:text-clinic-gold transition-colors uppercase tracking-[0.15em] relative group"
-          :class="isScrolled ? 'text-gray-600' : 'text-clinic-navy'"
-        >
-          {{ link.name }}
-          <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-clinic-gold transition-all duration-300 group-hover:w-full"></span>
-        </RouterLink>
+      <div class="hidden md:flex items-center space-x-10">
+        <div class="flex space-x-8">
+            <RouterLink 
+              v-for="link in navLinks" 
+              :key="link.path" 
+              :to="link.path"
+              class="text-[11px] font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-[0.2em] relative group py-2"
+            >
+              {{ link.name }}
+              <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-clinic-gold transition-all duration-500 group-hover:w-full"></span>
+            </RouterLink>
+        </div>
         
+        <div class="h-8 w-[1px] bg-white/10 mx-4"></div>
+
         <a 
           :href="content.contact.bookingLink" 
           target="_blank"
-          class="ml-4 px-7 py-2.5 bg-clinic-navy text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-clinic-gold transition-all duration-300 shadow-lg hover:shadow-clinic-gold/20 transform hover:-translate-y-0.5"
+          class="relative overflow-hidden group px-6 py-2.5 rounded-sm border border-white/20 hover:border-clinic-gold/50 transition-colors duration-500"
         >
-          Agendar Hora
+          <span class="absolute inset-0 bg-clinic-gold transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></span>
+          <span class="relative text-[10px] font-bold uppercase tracking-widest text-white group-hover:text-black transition-colors duration-300">
+            Reservar Cita
+          </span>
         </a>
       </div>
 
       <button 
         @click="isMobileMenuOpen = !isMobileMenuOpen" 
-        class="md:hidden relative w-10 h-10 flex items-center justify-center focus:outline-none"
-        aria-label="Menu"
+        class="md:hidden group flex items-center gap-3 focus:outline-none z-50 p-2"
+        aria-label="Menu Toggle"
       >
-        <div class="w-6 flex flex-col items-end justify-center gap-1.5">
-          <span :class="isMobileMenuOpen ? 'rotate-45 translate-y-2 w-6' : 'w-6'" class="block h-0.5 bg-clinic-navy transition-all duration-300"></span>
-          <span :class="isMobileMenuOpen ? 'opacity-0' : 'w-4'" class="block h-0.5 bg-clinic-navy transition-all duration-300"></span>
-          <span :class="isMobileMenuOpen ? '-rotate-45 -translate-y-2 w-6' : 'w-5'" class="block h-0.5 bg-clinic-navy transition-all duration-300"></span>
+        <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-clinic-gold transition-all duration-300"
+            :class="isMobileMenuOpen ? 'opacity-0 translate-x-2' : 'opacity-100'">
+            Menú
+        </span>
+
+        <div class="w-8 h-4 flex flex-col justify-between items-end relative overflow-hidden">
+          <span class="block h-[1px] bg-white transition-all duration-500"
+            :class="isMobileMenuOpen ? 'w-full -rotate-45 absolute top-1/2 left-0' : 'w-full'"></span>
+            
+          <span class="block h-[1px] bg-clinic-gold transition-all duration-500"
+            :class="isMobileMenuOpen ? 'opacity-0 translate-x-full' : 'w-2/3 group-hover:w-full'"></span>
+            
+          <span class="block h-[1px] bg-white transition-all duration-500"
+            :class="isMobileMenuOpen ? 'w-full rotate-45 absolute top-1/2 left-0' : 'w-full'"></span>
         </div>
       </button>
     </nav>
 
-    <Transition name="fade-slide">
+    <Transition name="mobile-menu">
       <div 
         v-if="isMobileMenuOpen"
-        class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-8 md:hidden"
+        class="fixed inset-0 bg-[#020202]/90 backdrop-blur-2xl z-[100] flex flex-col items-center justify-center"
       >
-        <div class="absolute inset-0 opacity-[0.03] pointer-events-none">
-          <div class="absolute top-[-10%] right-[-10%] w-64 h-64 rounded-full bg-clinic-gold blur-3xl"></div>
-          <div class="absolute bottom-[-10%] left-[-10%] w-64 h-64 rounded-full bg-clinic-navy blur-3xl"></div>
-        </div>
+        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+        <div class="absolute bottom-0 right-0 w-64 h-64 bg-clinic-gold/5 blur-[80px] rounded-full pointer-events-none"></div>
 
-        <div class="flex flex-col items-center space-y-8 w-full relative z-10">
-          <RouterLink 
-            v-for="(link, index) in navLinks" 
-            :key="link.path" 
-            :to="link.path"
-            @click="closeMobileMenu"
-            class="text-3xl font-serif text-clinic-navy hover:text-clinic-gold transition-all duration-300 transform opacity-0 animate-fade-in-up"
-            :style="{ animationDelay: `${index * 100}ms` }"
-          >
-            {{ link.name }}
-          </RouterLink>
-          
-          <div class="w-12 h-[1px] bg-clinic-gold/30 my-4"></div>
+        <div class="flex flex-col items-center w-full px-8 relative z-10">
+            
+          <nav class="flex flex-col items-center space-y-6 mb-12">
+            <RouterLink 
+              v-for="(link, index) in navLinks" 
+              :key="link.path" 
+              :to="link.path"
+              @click="closeMobileMenu"
+              class="font-serif text-4xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 hover:to-clinic-gold transition-all duration-500 transform opacity-0 animate-slide-up"
+              :style="{ animationDelay: `${150 + (index * 100)}ms` }"
+            >
+              {{ link.name }}
+            </RouterLink>
+          </nav>
+
+          <div class="w-12 h-[1px] bg-clinic-gold/30 mb-10 animate-fade-in" style="animation-delay: 600ms;"></div>
           
           <a 
             :href="content.contact.bookingLink"
             target="_blank" 
-            class="w-full max-w-xs text-center px-8 py-4 bg-clinic-navy text-white text-sm font-bold uppercase tracking-widest rounded-full shadow-xl opacity-0 animate-fade-in-up"
-            style="animation-delay: 400ms;"
+            class="w-full max-w-[200px] py-4 bg-white text-black text-xs font-bold uppercase tracking-widest text-center border border-white hover:bg-transparent hover:text-white transition-all duration-300 opacity-0 animate-fade-in-up"
+            style="animation-delay: 700ms;"
           >
-            Agendar Evaluación
+            Agendar Ahora
           </a>
-        </div>
 
-        <div class="absolute bottom-12 flex space-x-6 opacity-0 animate-fade-in-up" style="animation-delay: 500ms;">
-           <span class="text-xs font-bold text-clinic-gold uppercase tracking-widest italic">Dr. Oscar Arellano</span>
+          <div class="mt-16 text-center opacity-0 animate-fade-in" style="animation-delay: 900ms;">
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Santiago, Chile</p>
+            <p class="text-clinic-gold font-serif italic text-lg">+56 9 1234 5678</p>
+          </div>
         </div>
       </div>
     </Transition>
@@ -128,36 +152,48 @@ const navLinks = [
 </template>
 
 <style scoped>
-/* Transición del contenedor del menú */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: opacity 0.4s ease, transform 0.4s ease;
+/* Transiciones Vue Personalizadas */
+.mobile-menu-enter-active,
+.mobile-menu-leave-active {
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fade-slide-enter-from,
-.fade-slide-leave-to {
+.mobile-menu-enter-from,
+.mobile-menu-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  backdrop-filter: blur(0);
+}
+.mobile-menu-enter-from .animate-slide-up,
+.mobile-menu-leave-to .animate-slide-up {
+    transform: translateY(20px);
+    opacity: 0;
 }
 
-/* Animación de los links individuales */
+/* Animaciones Keyframes */
+.animate-slide-up {
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease forwards;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Evitar que el header sea transparente sobre el menú móvil */
-header.bg-white {
-  backdrop-blur: none !important;
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
