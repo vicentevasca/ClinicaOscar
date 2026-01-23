@@ -23,6 +23,13 @@ const router = createRouter({
       path: '/contacto',
       name: 'contact',
       component: () => import('../views/ContactView.vue')
+    },
+    // --- NUEVA RUTA AGREGADA ---
+    {
+      path: '/informacion',
+      name: 'information',
+      // Asegúrate de que el archivo esté en src/views/InformationView.vue
+      component: () => import('../views/InformationView.vue') 
     }
   ],
   // Comportamiento de scroll "suave" al cambiar de página
