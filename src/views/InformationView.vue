@@ -36,6 +36,7 @@ const treatmentsDB = {
   nariz: {
     title: "Rinomodelación Estética",
     treatment: "Rinomodelación",
+
     desc: "Corrección del perfil nasal para armonizar tu rostro. Rectificación de dorso y elevación de punta.",
     imgBefore: "https://images.unsplash.com/photo-1606103920295-97f88c0ce697?auto=format&fit=crop&q=80&w=800&grayscale",
     imgAfter: "https://images.unsplash.com/photo-1606103920295-97f88c0ce697?auto=format&fit=crop&q=80&w=800",
