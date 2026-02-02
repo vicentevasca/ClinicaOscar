@@ -6,7 +6,7 @@ import ServiceCard from "../components/UI/ServiceCard.vue";
 import InstagramGallery from "../components/UI/InstagramGallery.vue";
 
 // Importación de medios
-import oscarVideo from "../assets/img/oscar_video.mp4"; 
+import oscarVideo from "../assets/img/oscar_video_hero.mp4"; 
 import heroBackground from "../assets/img/hero_background.avif";
 
 // Referencias
