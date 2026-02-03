@@ -166,21 +166,6 @@ onMounted(() => {
 
       <div class="container mx-auto px-6 relative z-30 pt-20 md:pt-0">
         <div class="max-w-xl md:max-w-2xl animate-slide-up">
-          
-          <div class="overflow-hidden mb-6 md:mb-8">
-            <button 
-              @click="openModal"
-              class="inline-flex md:hidden items-center gap-2 text-clinic-gold font-bold tracking-[0.25em] uppercase text-[10px] mb-4 border border-clinic-gold/30 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md"
-            >
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              Ver Video Presentación
-            </button>
-
-            <span class="inline-flex items-center gap-3 text-clinic-gold font-bold tracking-[0.25em] uppercase text-[10px] md:text-xs animate-reveal border border-clinic-gold/20 px-4 py-2 rounded-full bg-black/30 backdrop-blur-sm">
-              <span class="w-2 h-2 rounded-full bg-clinic-gold shadow-[0_0_10px_#D4AF37] animate-pulse"></span>
-              Excelencia en Armonización
-            </span>
-          </div>
 
           <h1 class="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold text-white leading-[1.1] mb-6 md:mb-8 balance drop-shadow-2xl">
             {{ content.hero.title }}
