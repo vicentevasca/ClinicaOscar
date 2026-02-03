@@ -107,10 +107,10 @@ onMounted(() => {
         <img
           :src="heroBackground"
           alt="Clínica Estética Background"
-          class="hidden md:block w-full h-full object-cover object-center opacity-40 scale-105 animate-slow-zoom grayscale-[100%]"
+          class="hidden md:block w-full h-full object-cover object-center opacity-90 scale-105 animate-slow-zoom grayscale-[100%]"
         />
 
-        <div class="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/90 to-[#050505]/30"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/70 to-[#050505]/30"></div>
         <div class="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent"></div>
       </div>
 
