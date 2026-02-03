@@ -183,7 +183,6 @@ onMounted(() => {
             >
               <span class="relative z-10 flex items-center justify-center gap-2">
                 {{ content.hero.cta }}
-                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
               </span>
               <div class="absolute inset-0 bg-white/40 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></div>
             </a>
