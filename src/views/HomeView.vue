@@ -114,12 +114,7 @@ onMounted(() => {
         <div class="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent"></div>
       </div>
 
-      <button 
-        @click="openModal"
-        class="md:hidden absolute bottom-24 right-6 z-40 w-14 h-14 rounded-full bg-clinic-gold/90 text-black flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.4)] animate-pulse-slow border border-white/20"
-      >
-        <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      </button>
+     
 
       <div class="absolute bottom-0 right-[-15%] md:right-[5%] lg:right-[8%] z-10 h-full flex items-center justify-center hidden md:flex">
         <div class="relative w-[400px] lg:w-[450px] animate-luxury-entrance">
