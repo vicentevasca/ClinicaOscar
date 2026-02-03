@@ -24,12 +24,17 @@ const router = createRouter({
       name: 'contact',
       component: () => import('../views/ContactView.vue')
     },
-    // --- NUEVA RUTA AGREGADA ---
     {
       path: '/informacion',
       name: 'information',
-      // Asegúrate de que el archivo esté en src/views/InformationView.vue
       component: () => import('../views/InformationView.vue') 
+    },
+    // --- NUEVA RUTA: DASHBOARD ADMINISTRATIVO ---
+    {
+      path: '/admin',
+      name: 'admin',
+      // Se carga solo cuando entras a /admin para ahorrar recursos
+      component: () => import('../views/DashboardView.vue') 
     }
   ],
   // Comportamiento de scroll "suave" al cambiar de página

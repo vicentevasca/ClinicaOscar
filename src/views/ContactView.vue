@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import content from '../data/content.json';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+// IMPORTANTE: Importamos la app inicializada
+import { app } from '../firebase'; 
 
 const formData = ref({
   name: '',
@@ -13,14 +16,38 @@ const formData = ref({
 const isSubmitting = ref(false);
 const submitted = ref(false);
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  if (isSubmitting.value) return; // Evita doble clic
   isSubmitting.value = true;
-  // Simulación de envío
-  setTimeout(() => {
-    isSubmitting.value = false;
+  
+  try {
+    // IMPORTANTE: Pasamos la 'app' a getFunctions()
+    const functions = getFunctions(app);
+    const submitLead = httpsCallable(functions, 'submitLead');
+    
+    // Llamar al backend
+    await submitLead({
+      type: 'contact',
+      payload: {
+        name: formData.value.name,
+        email: formData.value.email,
+        phone: formData.value.phone,
+        service: formData.value.service,
+        message: formData.value.message
+      }
+    });
+
+    // Éxito visual
     submitted.value = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 1500);
+    formData.value = { name: '', email: '', phone: '', service: '', message: '' }; // Limpiar form
+
+  } catch (error) {
+    console.error("Error enviando formulario:", error);
+    alert("Hubo un problema de conexión. Por favor intenta más tarde o contáctanos por WhatsApp.");
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 </script>
 
