@@ -1,14 +1,13 @@
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-// IMPORTANTE: Importamos la app inicializada
-import { app } from '../firebase';
+import { app } from '../firebase'; // Importamos la app inicializada
 
 // --- ESTADOS DEL WIZARD ---
 const step = ref(1);
-const isLoading = ref(false);
+const loadingText = ref("Iniciando análisis biométrico..."); // Texto dinámico de carga
 
-// --- ESTADO DEL SLIDER ---
+// --- ESTADO DEL SLIDER (ANTES/DESPUÉS) ---
 const sliderPosition = ref(50);
 const isDragging = ref(false);
 const containerRef = ref(null);
@@ -22,49 +21,68 @@ const userProfile = reactive({
   intensity: '' 
 });
 
-// --- TUS TRATAMIENTOS (DB) ---
+// --- BASE DE DATOS DE TRATAMIENTOS EXTENDIDA ---
+// Agregamos: recuperación, nivel de dolor y duración del efecto.
 const treatmentsDB = {
   ojos: {
     title: "Rejuvenecimiento de Mirada",
-    treatment: "Relleno Hialurónico / Botox",
-    desc: "Suaviza expresiones y elimina el cansancio sin perder tu esencia.",
+    treatment: "Relleno de Ojeras / Botox",
+    desc: "Suaviza expresiones, elimina el cansancio y abre la mirada sin perder tu esencia.",
     imgBefore: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800&grayscale", 
     imgAfter: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800",
+    recovery: "Inmediata",
+    pain: "Mínimo",
+    duration: "6 - 12 meses"
   },
   nariz: {
     title: "Rinomodelación Estética",
-    treatment: "Rinomodelación",
-    desc: "Corrección del perfil nasal para armonizar tu rostro.",
+    treatment: "Rinomodelación Hialurónica",
+    desc: "Corrección del perfil nasal, rectificación del dorso y elevación de la punta sin cirugía.",
     imgBefore: "https://images.unsplash.com/photo-1606103920295-97f88c0ce697?auto=format&fit=crop&q=80&w=800&grayscale",
     imgAfter: "https://images.unsplash.com/photo-1606103920295-97f88c0ce697?auto=format&fit=crop&q=80&w=800",
+    recovery: "24-48 horas",
+    pain: "Leve",
+    duration: "12 - 18 meses"
   },
   labios: {
     title: "Diseño Labial & Armonización",
     treatment: "Lip Fillers / Hydralips",
-    desc: "Diseñamos tus labios respetando tu fisionomía.",
+    desc: "Diseño de labios respetando tu anatomía: volumen, hidratación y definición del arco de cupido.",
     imgBefore: "https://images.unsplash.com/photo-1588510701254-2280d924151a?auto=format&fit=crop&q=80&w=800&grayscale",
     imgAfter: "https://images.unsplash.com/photo-1588510701254-2280d924151a?auto=format&fit=crop&q=80&w=800",
+    recovery: "3-5 días (inflamación)",
+    pain: "Leve (Anestesia)",
+    duration: "8 - 12 meses"
   },
   mandibula: {
     title: "Definición del Óvalo Facial",
     treatment: "Marcación Mandibular",
-    desc: "Proyección y definición de ángulos.",
+    desc: "Proyección de ángulos para un rostro con mayor carácter, estructura y efecto lifting.",
     imgBefore: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&q=80&w=800&grayscale",
     imgAfter: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&q=80&w=800",
+    recovery: "Inmediata",
+    pain: "Leve",
+    duration: "12 - 18 meses"
   },
   papada: {
     title: "Perfilado Cervical",
-    treatment: "Enzimas (Mesolipopapada)",
-    desc: "Eliminación de grasa submentoniana.",
+    treatment: "Lipo Enzimática",
+    desc: "Eliminación de grasa submentoniana localizada para limpiar el perfil y estilizar el cuello.",
     imgBefore: "https://images.unsplash.com/photo-1552699616-8c92b2349e5d?auto=format&fit=crop&q=80&w=800&grayscale",
     imgAfter: "https://images.unsplash.com/photo-1552699616-8c92b2349e5d?auto=format&fit=crop&q=80&w=800",
+    recovery: "3-7 días",
+    pain: "Moderado",
+    duration: "Permanente (con peso estable)"
   },
   piel: {
     title: "Glow & Calidad de Piel",
     treatment: "Bioestimuladores / Pink Glow",
-    desc: "Tratamiento integral para devolver la luz a tu piel.",
+    desc: "Tratamiento integral para devolver la luminosidad, uniformidad y textura de porcelana.",
     imgBefore: "https://images.unsplash.com/photo-1554151228-14d9def656ec?auto=format&fit=crop&q=80&w=800&grayscale",
     imgAfter: "https://images.unsplash.com/photo-1554151228-14d9def656ec?auto=format&fit=crop&q=80&w=800",
+    recovery: "24 horas",
+    pain: "Mínimo",
+    duration: "12 meses"
   }
 };
 
@@ -73,15 +91,17 @@ const recommendation = computed(() => {
   return treatmentsDB[userProfile.zone];
 });
 
-// --- LÓGICA DE ENVÍO ---
+// --- LÓGICA DE ENVÍO AL DASHBOARD ---
 const sendDiagnosisToManager = async () => {
   try {
-    // IMPORTANTE: Pasamos la 'app' aquí también
     const functions = getFunctions(app);
     const submitLead = httpsCallable(functions, 'submitLead');
     
-    const treatmentName = recommendation.value?.treatment || 'General';
+    // Obtenemos todos los datos para alimentar el dashboard
+    const treatmentInfo = recommendation.value || {};
+    const treatmentName = treatmentInfo.treatment || 'General';
 
+    // "Fire and Forget": Enviamos pero no bloqueamos si falla
     submitLead({
       type: 'diagnosis',
       payload: {
@@ -89,20 +109,60 @@ const sendDiagnosisToManager = async () => {
         ageRange: userProfile.ageRange,
         zoneLabel: userProfile.zoneLabel,
         intensity: userProfile.intensity,
-        treatmentRecommended: treatmentName
+        treatmentRecommended: treatmentName,
+        // Datos extra para analítica futura
+        estimatedRecovery: treatmentInfo.recovery || 'N/A',
+        estimatedDuration: treatmentInfo.duration || 'N/A'
       }
-    }).catch(err => console.warn("Error background:", err));
+    }).catch(err => console.warn("Error background sync:", err));
 
-    console.log("Enviando lead...");
+    console.log("Enviando lead de diagnóstico...");
   } catch (e) {
-    console.warn("Error funciones:", e);
+    console.warn("Error conexión funciones:", e);
   }
 };
 
-// --- RESTO DE TU LÓGICA (SLIDER, WHATSAPP, NAV) ---
-// (He resumido esta parte porque es igual que antes, 
-// lo importante es que los bloques anteriores reemplacen a los actuales)
+// --- SIMULACIÓN DE ANÁLISIS IA ---
+const runAnalysisSimulation = () => {
+  step.value = 4; // Pantalla de carga
+  
+  const messages = [
+    "Escaneando simetría facial...",
+    "Analizando proporciones...",
+    "Calculando proyección ideal...",
+    "Buscando tratamiento óptimo...",
+    "Generando visualización..."
+  ];
 
+  let i = 0;
+  // Cambia el texto cada 600ms
+  const interval = setInterval(() => {
+    loadingText.value = messages[i];
+    i++;
+    if (i >= messages.length) clearInterval(interval);
+  }, 600);
+
+  // Termina después de 3.5 segundos
+  setTimeout(() => {
+    step.value = 5; // Resultado
+    
+    // Animación automática del slider (Demo)
+    setTimeout(() => {
+        let direction = 1;
+        let pos = 50;
+        const sliderAnim = setInterval(() => {
+            if (isDragging.value) { clearInterval(sliderAnim); return; }
+            pos += direction;
+            if (pos > 65 || pos < 35) direction *= -1;
+            sliderPosition.value = pos;
+        }, 20);
+        setTimeout(() => { clearInterval(sliderAnim); sliderPosition.value = 50; }, 1200);
+    }, 800);
+
+  }, 3500);
+};
+
+// --- LÓGICA DEL SLIDER ---
 const handleMove = (event) => {
   if (!containerRef.value) return;
   const rect = containerRef.value.getBoundingClientRect();
@@ -113,12 +173,7 @@ const handleMove = (event) => {
 const startDrag = () => { isDragging.value = true; };
 const stopDrag = () => { isDragging.value = false; };
 
-const whatsappLink = computed(() => {
-  if (!recommendation.value) return '#';
-  const text = `Hola Dr. Arellano, mi perfil es: ${userProfile.gender}, ${userProfile.ageRange}. Zona: ${userProfile.zoneLabel}. Objetivo: ${userProfile.intensity}. Interés: ${recommendation.value.treatment}`;
-  return `https://wa.me/56912345678?text=${encodeURIComponent(text)}`;
-});
-
+// --- NAVEGACIÓN ---
 const selectGender = (g) => userProfile.gender = g;
 const selectAge = (a) => userProfile.ageRange = a;
 const nextStep = () => { if (step.value === 1 && (!userProfile.gender || !userProfile.ageRange)) return; step.value++; };
@@ -126,25 +181,8 @@ const selectZone = (key, label) => { userProfile.zone = key; userProfile.zoneLab
 
 const selectIntensity = (level) => {
   userProfile.intensity = level;
-  isLoading.value = true;
-  step.value = 4;
-  
-  sendDiagnosisToManager(); // Ejecuta envío
-
-  setTimeout(() => {
-    isLoading.value = false;
-    setTimeout(() => {
-        let direction = 1;
-        let pos = 50;
-        const interval = setInterval(() => {
-            if (isDragging.value) { clearInterval(interval); return; }
-            pos += direction;
-            if (pos > 60 || pos < 40) direction *= -1;
-            sliderPosition.value = pos;
-        }, 30);
-        setTimeout(() => clearInterval(interval), 1500);
-    }, 500);
-  }, 1800);
+  sendDiagnosisToManager(); // Guardar en BD
+  runAnalysisSimulation();  // Iniciar show de carga
 };
 
 const reset = () => {
@@ -153,174 +191,205 @@ const reset = () => {
   userProfile.ageRange = '';
   userProfile.zone = '';
   userProfile.intensity = '';
-  isLoading.value = false;
   sliderPosition.value = 50;
 };
+
+// --- WHATSAPP GENERATOR ---
+const whatsappLink = computed(() => {
+  if (!recommendation.value) return '#';
+  
+  const text = `Hola Dr. Arellano, mi diagnóstico IA dice que necesito *${recommendation.value.treatment}* en la zona de *${userProfile.zoneLabel}*.
+  
+📋 *Mi Perfil:*
+• Edad: ${userProfile.ageRange}
+• Objetivo: ${userProfile.intensity}
+  
+Me gustaría agendar una evaluación para confirmar si este tratamiento es para mí.`;
+
+  return `https://wa.me/56912345678?text=${encodeURIComponent(text)}`;
+});
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#050505] flex items-center justify-center p-4 relative overflow-hidden font-sans select-none">
-    
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-clinic-gold/10 blur-[120px] rounded-full"></div>
-        <div class="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/10 blur-[120px] rounded-full"></div> <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
-    </div>
-
-    <div class="w-full max-w-2xl relative z-10">
+  <div class="min-h-screen bg-[#050505] text-white pt-24 px-4 pb-12 selection:bg-clinic-gold selection:text-black">
+    <div class="max-w-4xl mx-auto">
       
-      <div class="text-center mb-6 transition-all duration-500" :class="{ 'opacity-0 h-0 overflow-hidden mb-0': step === 4 && !isLoading }">
-        <span class="text-clinic-gold font-bold tracking-[0.2em] text-[10px] uppercase mb-2 block animate-fade-in">
-          Diagnóstico & Inclusión
-        </span>
-        <h1 class="text-2xl md:text-4xl font-serif text-white font-bold mb-2">
-          Tu Mejor Versión
-        </h1>
-        <p class="text-gray-400 text-xs md:text-sm font-light max-w-md mx-auto">
-          Protocolos personalizados respetando tu identidad y rasgos únicos.
+      <div class="text-center mb-10 animate-fade-in-up">
+        <h2 class="text-3xl md:text-5xl font-serif italic text-clinic-gold mb-3">Diagnóstico Facial IA</h2>
+        <p class="text-gray-400 max-w-lg mx-auto text-sm md:text-base">
+          Nuestra inteligencia artificial analiza tus objetivos para recomendarte el protocolo estético ideal.
         </p>
       </div>
 
-      <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden transition-all duration-500 min-h-[400px] flex flex-col justify-center" :class="step === 4 && !isLoading ? 'border-clinic-gold/40' : ''">
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-10 backdrop-blur-md relative overflow-hidden min-h-[500px] flex flex-col justify-center">
         
-        <div class="absolute top-0 left-0 h-1 bg-clinic-gold transition-all duration-700 ease-out z-20" :style="{ width: `${(step / 4) * 100}%` }"></div>
-
         <Transition name="slide-fade" mode="out-in">
-          
           <div v-if="step === 1" key="step1" class="w-full">
-            <div class="mb-6">
-              <label class="block text-white text-xs md:text-sm font-bold uppercase tracking-widest mb-4">1. ¿Cuál es tu identidad?</label>
-              <div class="grid grid-cols-3 gap-3">
-                <button 
-                  v-for="g in [
-                    {key: 'mujer', icon: '👩', label: 'Mujer'},
-                    {key: 'hombre', icon: '👨', label: 'Hombre'},
-                    {key: 'no-binario', icon: '🌈', label: 'No Binario'}
-                  ]"
-                  :key="g.key"
-                  @click="selectGender(g.key)"
-                  :class="userProfile.gender === g.key ? 'bg-clinic-gold text-black border-clinic-gold' : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/30'"
-                  class="p-3 md:p-4 border rounded-xl transition-all duration-300 font-bold flex flex-col items-center gap-2 group"
-                >
-                  <span class="text-2xl filter group-hover:brightness-125">{{ g.icon }}</span>
-                  <span class="text-[10px] md:text-xs uppercase tracking-wide">{{ g.label }}</span>
-                </button>
+            <h3 class="text-2xl font-bold text-center mb-8">Cuéntanos sobre ti</h3>
+            
+            <div class="space-y-8">
+              <div>
+                <p class="text-sm text-clinic-gold uppercase tracking-widest font-bold mb-4 text-center">Género</p>
+                <div class="flex justify-center gap-4">
+                  <button v-for="g in ['Mujer', 'Hombre', 'No-Binario']" :key="g"
+                    @click="selectGender(g)"
+                    class="px-6 py-3 rounded-full border transition-all duration-300 min-w-[100px]"
+                    :class="userProfile.gender === g ? 'bg-clinic-gold text-black border-clinic-gold font-bold scale-105' : 'border-white/20 text-gray-400 hover:border-white hover:text-white'">
+                    {{ g }}
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="userProfile.gender" class="animate-fade-in">
+                <p class="text-sm text-clinic-gold uppercase tracking-widest font-bold mb-4 text-center">Rango de Edad</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <button v-for="a in ['18-25', '26-35', '36-45', '46+']" :key="a"
+                    @click="selectAge(a)"
+                    class="p-3 rounded-xl border transition-all duration-300"
+                    :class="userProfile.ageRange === a ? 'bg-white/10 border-clinic-gold text-white shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'bg-black/20 border-white/10 text-gray-500 hover:border-white/50'">
+                    {{ a }} años
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div>
-              <label class="block text-white text-xs md:text-sm font-bold uppercase tracking-widest mb-4">2. Edad</label>
-              <div class="grid grid-cols-4 gap-2">
-                <button v-for="age in ['18-25', '26-35', '36-50', '50+']" :key="age"
-                  @click="selectAge(age)"
-                  :class="userProfile.ageRange === age ? 'bg-white text-black scale-105' : 'bg-white/5 text-gray-400 hover:bg-white/10'"
-                  class="py-3 rounded-lg text-xs font-bold transition-all border border-transparent"
-                >
-                  {{ age }}
-                </button>
-              </div>
+            <div class="mt-10 text-center">
+              <button @click="nextStep" 
+                :disabled="!userProfile.gender || !userProfile.ageRange"
+                class="bg-white text-black px-8 py-3 rounded-full font-bold uppercase tracking-widest hover:bg-clinic-gold transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                Siguiente
+              </button>
             </div>
-
-            <button 
-              @click="nextStep"
-              :disabled="!userProfile.gender || !userProfile.ageRange"
-              class="w-full mt-8 py-4 bg-gradient-to-r from-clinic-gold to-[#fcf6ba] text-black font-bold uppercase tracking-widest rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all"
-            >
-              Continuar
-            </button>
           </div>
 
           <div v-else-if="step === 2" key="step2" class="w-full">
-            <label class="block text-white text-sm font-bold uppercase tracking-widest mb-6 text-center">3. ¿Qué deseas potenciar?</label>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <button @click="selectZone('ojos', 'Ojeras / Mirada')" class="zone-btn group"><span class="text-2xl mb-1">👁️</span><span class="text-xs">Mirada</span></button>
-              <button @click="selectZone('nariz', 'Nariz')" class="zone-btn group"><span class="text-2xl mb-1">👃</span><span class="text-xs">Nariz</span></button>
-              <button @click="selectZone('labios', 'Labios')" class="zone-btn group"><span class="text-2xl mb-1">👄</span><span class="text-xs">Labios</span></button>
-              <button @click="selectZone('mandibula', 'Mandíbula')" class="zone-btn group"><span class="text-2xl mb-1">📐</span><span class="text-xs">Mandíbula</span></button>
-              <button @click="selectZone('papada', 'Cuello/Papada')" class="zone-btn group"><span class="text-2xl mb-1">🧣</span><span class="text-xs">Cuello</span></button>
-              <button @click="selectZone('piel', 'Piel')" class="zone-btn group"><span class="text-2xl mb-1">✨</span><span class="text-xs">Piel</span></button>
+            <h3 class="text-2xl font-bold text-center mb-2">¿Qué zona te gustaría mejorar?</h3>
+            <p class="text-center text-gray-500 mb-8 text-sm">Selecciona el área prioritaria para el análisis.</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <button @click="selectZone('ojos', 'Mirada / Ojeras')" class="zone-btn group">
+                <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">👁️</span>
+                <span class="text-sm font-medium">Mirada</span>
+              </button>
+              <button @click="selectZone('nariz', 'Nariz / Perfil')" class="zone-btn group">
+                <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">👃</span>
+                <span class="text-sm font-medium">Nariz</span>
+              </button>
+              <button @click="selectZone('labios', 'Labios')" class="zone-btn group">
+                <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">💋</span>
+                <span class="text-sm font-medium">Labios</span>
+              </button>
+              <button @click="selectZone('mandibula', 'Mandíbula / Mentón')" class="zone-btn group">
+                <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">📐</span>
+                <span class="text-sm font-medium">Mandíbula</span>
+              </button>
+              <button @click="selectZone('papada', 'Cuello / Papada')" class="zone-btn group">
+                <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">🦢</span>
+                <span class="text-sm font-medium">Papada</span>
+              </button>
+              <button @click="selectZone('piel', 'Calidad de Piel')" class="zone-btn group">
+                <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">✨</span>
+                <span class="text-sm font-medium">Piel / Glow</span>
+              </button>
             </div>
-            <button @click="step = 1" class="mt-6 text-gray-500 text-[10px] uppercase tracking-widest hover:text-white w-full text-center">← Volver</button>
           </div>
 
           <div v-else-if="step === 3" key="step3" class="w-full">
-            <label class="block text-white text-sm font-bold uppercase tracking-widest mb-6 text-center">4. ¿Cuál es tu objetivo?</label>
-            <div class="space-y-4">
-              <button @click="selectIntensity('Natural y Sutil')" class="intensity-btn group">
-                <div class="intensity-icon">🍃</div>
-                <div><span class="block text-white font-bold">Natural</span><span class="text-gray-400 text-xs">Mejorar sin cambiar mi esencia.</span></div>
-              </button>
-              <button @click="selectIntensity('Transformación / Glow Up')" class="intensity-btn group">
-                <div class="intensity-icon">💎</div>
-                <div><span class="block text-white font-bold">Glow Up / Armonización</span><span class="text-gray-400 text-xs">Definición, proyección y cambio visible.</span></div>
-              </button>
-            </div>
-            <button @click="step = 2" class="mt-6 text-gray-500 text-[10px] uppercase tracking-widest hover:text-white w-full text-center">← Volver</button>
-          </div>
-
-          <div v-else-if="isLoading" key="loading" class="text-center w-full">
-             <div class="w-12 h-12 border-t-2 border-clinic-gold rounded-full animate-spin mx-auto mb-4"></div>
-             <p class="text-gray-400 text-xs animate-pulse">Analizando facciones...</p>
-          </div>
-
-          <div v-else-if="step === 4 && !isLoading" key="result" class="w-full">
+            <h3 class="text-2xl font-bold text-center mb-8">¿Qué resultado buscas?</h3>
             
-            <div class="flex justify-between items-end mb-4 animate-fade-in-up">
-              <div>
-                <span class="text-clinic-gold text-[10px] font-bold uppercase tracking-widest">Recomendación</span>
-                <h2 class="text-xl md:text-2xl font-serif text-white font-bold leading-none mt-1">{{ recommendation.title }}</h2>
-              </div>
-              <div class="text-right hidden md:block">
-                 <span class="text-[9px] text-gray-500 uppercase tracking-widest">Protocolo</span>
-                 <p class="text-white text-xs font-bold">{{ recommendation.treatment }}</p>
-              </div>
-            </div>
-
-            <div 
-              ref="containerRef"
-              class="relative w-full h-[250px] md:h-[300px] rounded-xl overflow-hidden cursor-ew-resize touch-none shadow-2xl mb-6 group select-none animate-fade-in-up delay-100 border border-white/10"
-              @mousedown="startDrag"
-              @touchstart="startDrag"
-              @mousemove="isDragging && handleMove($event)"
-              @touchmove="isDragging && handleMove($event)"
-              @mouseup="stopDrag"
-              @touchend="stopDrag"
-              @mouseleave="stopDrag"
-            >
-                <img :src="recommendation.imgAfter" class="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" alt="Después" />
-                <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] text-white font-bold uppercase tracking-widest z-10 pointer-events-none">Después</div>
-
-                <div 
-                  class="absolute inset-0 h-full overflow-hidden pointer-events-none will-change-[width]"
-                  :style="{ width: `${sliderPosition}%` }"
-                >
-                    <img :src="recommendation.imgBefore" class="absolute top-0 left-0 h-full max-w-none w-[100%] md:w-[600px] object-cover" :style="{ width: containerRef?.offsetWidth + 'px' }" alt="Antes" />
-                    <div class="absolute top-4 left-4 bg-white/20 backdrop-blur-md px-2 py-1 rounded text-[10px] text-white font-bold uppercase tracking-widest z-10">Antes</div>
+            <div class="space-y-4 max-w-md mx-auto">
+              <button @click="selectIntensity('Natural')" class="intensity-btn group">
+                <div class="intensity-icon">🍃</div>
+                <div>
+                  <h4 class="font-bold text-white group-hover:text-clinic-gold transition-colors">Mejora Sutil</h4>
+                  <p class="text-xs text-gray-400">"Que me vean mejor pero no sepan qué me hice"</p>
                 </div>
+              </button>
 
-                <div 
-                  class="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-20 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center will-change-[left]"
-                  :style="{ left: `${sliderPosition}%` }"
-                >
-                    <div class="w-8 h-8 bg-clinic-gold rounded-full flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110">
-                        <svg class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" transform="rotate(90 12 12)" /></svg>
-                    </div>
+              <button @click="selectIntensity('Balanceada')" class="intensity-btn group">
+                <div class="intensity-icon">⚖️</div>
+                <div>
+                  <h4 class="font-bold text-white group-hover:text-clinic-gold transition-colors">Armonización</h4>
+                  <p class="text-xs text-gray-400">Equilibrio facial y corrección de asimetrías visibles</p>
+                </div>
+              </button>
+
+              <button @click="selectIntensity('Transformación')" class="intensity-btn group">
+                <div class="intensity-icon">💎</div>
+                <div>
+                  <h4 class="font-bold text-white group-hover:text-clinic-gold transition-colors">Cambio Definido</h4>
+                  <p class="text-xs text-gray-400">Resultados notorios, perfilado y estructura marcada</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div v-else-if="step === 4" key="step4" class="w-full text-center">
+            <div class="relative w-24 h-24 mx-auto mb-6">
+              <div class="absolute inset-0 border-4 border-white/10 rounded-full"></div>
+              <div class="absolute inset-0 border-4 border-t-clinic-gold rounded-full animate-spin"></div>
+              <div class="absolute inset-0 flex items-center justify-center text-2xl animate-pulse">🤖</div>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">IA trabajando</h3>
+            <p class="text-clinic-gold font-mono text-sm tracking-widest">{{ loadingText }}</p>
+          </div>
+
+          <div v-else-if="step === 5" key="step5" class="w-full">
+            <div class="text-center mb-6">
+              <p class="text-xs uppercase tracking-widest text-gray-500 mb-1">Tratamiento Recomendado</p>
+              <h2 class="text-2xl md:text-3xl font-serif italic text-clinic-gold">{{ recommendation.title }}</h2>
+              <p class="text-white font-bold text-lg mt-2">{{ recommendation.treatment }}</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+                <div class="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <span class="block text-[10px] text-gray-400 uppercase">Recuperación</span>
+                    <span class="text-xs font-bold text-white">{{ recommendation.recovery }}</span>
+                </div>
+                <div class="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <span class="block text-[10px] text-gray-400 uppercase">Dolor</span>
+                    <span class="text-xs font-bold text-white">{{ recommendation.pain }}</span>
+                </div>
+                <div class="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <span class="block text-[10px] text-gray-400 uppercase">Duración</span>
+                    <span class="text-xs font-bold text-white">{{ recommendation.duration }}</span>
                 </div>
             </div>
 
-            <div class="bg-white/5 rounded-xl p-4 mb-6 text-left border-l-2 border-clinic-gold animate-fade-in-up delay-200">
-              <p class="text-gray-300 text-xs md:text-sm leading-relaxed mb-3">{{ recommendation.desc }}</p>
-              <div class="flex gap-4 text-[10px] uppercase tracking-widest text-gray-500">
-                <span>Recuperación: <b class="text-white">{{ recommendation.recovery }}</b></span>
-                <span>Dolor: <b class="text-white">{{ recommendation.pain }}</b></span>
+            <div class="relative w-full aspect-[4/3] md:aspect-[16/9] rounded-2xl overflow-hidden mb-8 border border-white/10 group select-none touch-none"
+                 ref="containerRef"
+                 @mousedown="startDrag" @touchstart="startDrag"
+                 @mouseup="stopDrag" @touchend="stopDrag"
+                 @mouseleave="stopDrag"
+                 @mousemove="handleMove" @touchmove="handleMove">
+              
+              <img :src="recommendation.imgBefore" class="absolute inset-0 w-full h-full object-cover grayscale" alt="Antes">
+              <div class="absolute top-4 left-4 bg-black/60 px-3 py-1 rounded text-xs font-bold text-white">ANTES</div>
+
+              <div class="absolute inset-0 w-full h-full overflow-hidden" :style="{ width: sliderPosition + '%' }">
+                <img :src="recommendation.imgAfter" class="absolute top-0 left-0 max-w-none h-full object-cover" 
+                     :style="{ width: containerRef?.offsetWidth + 'px' }" alt="Después">
+                <div class="absolute top-4 right-4 bg-clinic-gold/90 px-3 py-1 rounded text-xs font-bold text-black">DESPUÉS (Simulación)</div>
+              </div>
+
+              <div class="absolute top-0 bottom-0 w-1 bg-clinic-gold cursor-ew-resize shadow-[0_0_10px_rgba(212,175,55,0.8)] z-10"
+                   :style="{ left: sliderPosition + '%' }">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-clinic-gold rounded-full flex items-center justify-center shadow-lg">
+                  <span class="text-black text-xs font-bold">↔</span>
+                </div>
               </div>
             </div>
 
-            <a :href="whatsappLink" target="_blank" class="block w-full py-4 bg-[#25D366] hover:bg-[#1fa855] text-white font-bold uppercase tracking-widest rounded-lg shadow-lg flex items-center justify-center gap-2 animate-fade-in-up delay-300 transition-colors">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-              Confirmar Interés
+            <div class="bg-white/5 p-4 rounded-xl border-l-2 border-clinic-gold mb-8">
+              <p class="text-sm text-gray-300 italic">"{{ recommendation.desc }}"</p>
+            </div>
+
+            <a :href="whatsappLink" target="_blank"
+               class="block w-full bg-gradient-to-r from-clinic-gold to-yellow-600 text-black font-bold text-center py-4 rounded-full text-lg uppercase tracking-wider hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all transform hover:-translate-y-1">
+               Agendar Evaluación
             </a>
             
-            <button @click="reset" class="mt-6 text-gray-600 text-[10px] uppercase tracking-widest hover:text-white transition-colors w-full">Reiniciar</button>
+            <button @click="reset" class="mt-6 text-gray-600 text-xs uppercase tracking-widest hover:text-white transition-colors w-full pb-4">Reiniciar Diagnóstico</button>
           </div>
         </Transition>
       </div>
@@ -330,23 +399,23 @@ const reset = () => {
 
 <style scoped>
 .zone-btn {
-  @apply flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:border-clinic-gold/50 transition-all duration-300 text-gray-300 hover:text-white;
+  @apply flex flex-col items-center justify-center p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:border-clinic-gold/50 transition-all duration-300 text-gray-300 hover:text-white;
 }
 .intensity-btn {
   @apply w-full p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:border-clinic-gold/50 transition-all duration-300 text-left flex items-center gap-4;
 }
 .intensity-icon {
-  @apply shrink-0 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-lg group-hover:bg-clinic-gold group-hover:text-black transition-colors;
+  @apply shrink-0 w-12 h-12 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-2xl group-hover:bg-clinic-gold group-hover:text-black transition-colors;
 }
 
-/* Transiciones */
-.slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.3s ease; }
-.slide-fade-enter-from { opacity: 0; transform: translateX(10px); }
-.slide-fade-leave-to { opacity: 0; transform: translateX(-10px); }
+/* Transiciones Suaves */
+.slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.4s ease; }
+.slide-fade-enter-from { opacity: 0; transform: translateY(10px); }
+.slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }
 
-.animate-fade-in-up { opacity: 0; animation: fadeInUp 0.6s ease-out forwards; }
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px); }
+.animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
